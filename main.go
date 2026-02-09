@@ -184,7 +184,30 @@ func main() {
 		}
 	}
 
-	logger.Println("[PARENT] finished.")
+	// Graceful shutdown with timeout (10 seconds max)
+	shutdownDone := make(chan struct{})
+	go func() {
+		logger.Println("[PARENT] waiting for goroutines to finish...")
+		// Note: All goroutines should be finishing now due to context cancellation
+		shutdownDone <- struct{}{}
+	}()
+
+	select {
+	case <-shutdownDone:
+		// Clean exit
+		logger.Println("[PARENT] finished.")
+	case <-time.After(10 * time.Second):
+		logger.Println("[PARENT] shutdown timeout reached, forcing exit...")
+		// Force flush any remaining logs
+		if logFile != nil {
+			logFile.Sync()
+		}
+		if historyFile != nil {
+			historyFile.Sync()
+		}
+		// Hard exit to avoid hanging console
+		os.Exit(0)
+	}
 }
 
 // logConfig prints config for debugging
@@ -302,10 +325,28 @@ func spawnChildrenForFolders(ctx context.Context, cfg Config) {
 				logger.Printf("[PARENT] assign to job failed for %s: %v", filepath.Base(folder), err)
 			}
 
-			// Wait for child to finish
-			if err := cmd.Wait(); err != nil {
-				if ctx.Err() != context.Canceled {
+			// Wait for child to finish, but be responsive to context cancellation
+			waitDone := make(chan error, 1)
+			go func() {
+				waitDone <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-waitDone:
+				if err != nil && ctx.Err() != context.Canceled {
 					logger.Printf("[PARENT] Child error %s: %v", filepath.Base(folder), err)
+				}
+			case <-ctx.Done():
+				// Context cancelled, try to kill the child
+				logger.Printf("[PARENT] Killing child %s due to context cancellation", filepath.Base(folder))
+				if cmd.Process != nil {
+					cmd.Process.Kill()
+				}
+				// Wait a bit for it to die
+				select {
+				case <-waitDone:
+				case <-time.After(2 * time.Second):
+					logger.Printf("[PARENT] Child %s did not exit in time after kill signal", filepath.Base(folder))
 				}
 			}
 		}(f)
