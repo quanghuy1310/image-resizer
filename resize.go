@@ -354,7 +354,8 @@ func ProcessFolderTree(cfg Config) error {
 			folders = append(folders, fd)
 			return nil
 		}
-		if cfg.ProcessMode == "stream" {
+		if cfg.ProcessMode == "stream" || cfg.ProcessAllFolders {
+			// In stream mode or when ProcessAllFolders is enabled, include non-date folders
 			folders = append(folders, FolderDate{Path: path})
 		}
 		return nil

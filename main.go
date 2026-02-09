@@ -236,7 +236,8 @@ func spawnChildrenForFolders(ctx context.Context, cfg Config) {
 			if fd, ok := parseFolderDate(rel); ok {
 				fd.Path = path
 				folders = append(folders, fd)
-			} else if cfg.ProcessMode == "stream" {
+			} else if cfg.ProcessMode == "stream" || cfg.ProcessAllFolders {
+				// In stream mode or when ProcessAllFolders is enabled, include non-date folders
 				folders = append(folders, FolderDate{Path: path})
 			}
 		}

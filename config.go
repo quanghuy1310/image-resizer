@@ -25,6 +25,9 @@ type Config struct {
 	ImagePrefixes []string
 	// DryRun when true will not perform any writes; actions are logged only
 	DryRun bool
+	// ProcessAllFolders when true will process all subfolders in multi mode,
+	// not just those matching YYYY/MM/DD format
+	ProcessAllFolders bool
 
 	LogFile          string
 	ResizeHistoryLog string
@@ -91,6 +94,7 @@ func LoadConfig() Config {
 		Verbose:            getBool("VERBOSE", false),
 		ImagePrefixes:      parseCSVLower(get("IMAGE_PREFIXES", "Full_,Vehicle_")),
 		DryRun:             getBool("DRY_RUN", false),
+		ProcessAllFolders:  getBool("PROCESS_ALL_FOLDERS", false),
 		LogFile:            get("LOG_FILE", filepath.Join(".", "resize.log")),
 		ResizeHistoryLog:   get("RESIZE_HISTORY_LOG", filepath.Join(".", "resize_history.log")),
 		LogMaxMB:           getInt64("LOG_MAX_MB", 100),
