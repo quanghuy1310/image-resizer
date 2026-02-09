@@ -17,6 +17,11 @@ func RunScheduler(ctx context.Context, cfg Config) {
 		return
 	}
 
+	logger.Printf("[SCHEDULER] Starting at %02d:%02d daily | DRY_RUN=%v", cfg.ScheduleHour, cfg.ScheduleMin, cfg.DryRun)
+	if cfg.DryRun {
+		logger.Println("[SCHEDULER] *** DRY-RUN MODE ENABLED ***")
+	}
+
 	hour := cfg.ScheduleHour
 	min := cfg.ScheduleMin
 	var lastRunDate time.Time

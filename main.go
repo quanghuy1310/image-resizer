@@ -147,6 +147,9 @@ func main() {
 		if *folderArg == "" {
 			logger.Fatal("[FATAL] child mode requires --folder argument")
 		}
+		if cfg.DryRun {
+			logger.Println("[CHILD] *** DRY-RUN MODE ENABLED ***")
+		}
 		err := processFolder(*folderArg, cfg)
 		if err != nil {
 			// Thêm kiểm tra context bị hủy (do Parent chết)
@@ -162,7 +165,10 @@ func main() {
 	}
 
 	// --- PARENT PROCESS MODE ---
-	logger.Printf("[PARENT] Starting... Mode=%s", cfg.ProcessMode)
+	logger.Printf("[PARENT] Starting... Mode=%s | DRY_RUN=%v", cfg.ProcessMode, cfg.DryRun)
+	if cfg.DryRun {
+		logger.Println("[PARENT] *** DRY-RUN MODE ENABLED - No files will be written or children spawned ***")
+	}
 
 	if cfg.EnableScheduler {
 		RunScheduler(ctx, cfg)
