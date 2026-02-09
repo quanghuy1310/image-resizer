@@ -1,0 +1,22 @@
+# Node.js
+node_modules/
+dist/
+.env
+
+# Golang
+bin/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+vips-dev-8.10
+vips-dev-w64-all-8.10.5.zip
+vips-dev-w64-all-8.17.3.zip
