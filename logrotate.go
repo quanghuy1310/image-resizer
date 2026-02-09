@@ -28,10 +28,8 @@ type AtomicWriter struct {
 	v atomic.Value // holds io.Writer
 }
 
-func NewAtomicWriter(w io.Writer) *AtomicWriter {
-	aw := &AtomicWriter{}
-	aw.v.Store(w)
-	return aw
+func NewAtomicWriter() *AtomicWriter {
+	return &AtomicWriter{}
 }
 
 func (aw *AtomicWriter) Write(p []byte) (int, error) {
@@ -63,9 +61,9 @@ func setupLogger(cfg Config) {
 		return
 	}
 	f, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
-	// Initialize atomic writer(s)
-	mainAtomicWriter = NewAtomicWriter(os.Stdout)
-	historyAtomicWriter = NewAtomicWriter(io.Discard)
+	// Initialize atomic writer(s) without pre-storing (to avoid type mismatch panic)
+	mainAtomicWriter = NewAtomicWriter()
+	historyAtomicWriter = NewAtomicWriter()
 
 	if err == nil {
 		logFile = f

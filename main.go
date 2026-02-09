@@ -93,10 +93,9 @@ func main() {
 	// Wire the package-level historyFile and atomic writer/logger
 	historyFile = hf
 	if historyAtomicWriter == nil {
-		historyAtomicWriter = NewAtomicWriter(hf)
-	} else {
-		historyAtomicWriter.Store(hf)
+		historyAtomicWriter = NewAtomicWriter()
 	}
+	historyAtomicWriter.Store(hf)
 	historyLogger = log.New(historyAtomicWriter, "", log.LstdFlags|log.Lmicroseconds)
 	defer hf.Close()
 
